@@ -151,8 +151,10 @@ def metro_route_finder(**kwargs):
     nodes = []
 
     if not all(map(lambda x: x in graph, (start, destiny))):
-        extra_response['present_in_graph'][start] = start in graph
-        extra_response['present_in_graph'][destiny] = destiny in graph
+        if start:
+            extra_response['present_in_graph'][start] = start in graph
+        if destiny:
+            extra_response['present_in_graph'][destiny] = destiny in graph
 
     with ignore():
         nodes = find_path(graph, start, destiny).nodes

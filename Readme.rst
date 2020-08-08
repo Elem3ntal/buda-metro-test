@@ -1,7 +1,7 @@
 Primeros pasos.
 #################################
 
-Se debe asegurar la existencia del environment de desarrollo para **python 3.8** [1]_. por lo que, en la carpeta raíz del proyecto (Lambdas) se debe ejecutar:
+Se debe asegurar la existencia del environment de desarrollo para **python 3.8** [1]_. por lo que, en la carpeta raíz del proyecto (Lambdas/buda-metro-test) se debe ejecutar:
 
 ::
 
@@ -21,6 +21,7 @@ Sobre full-install?
 - **create-virtual**: En caso de no existir el environment del ambiente (lambdas), lo crea.
 - **install-requirements-python**: Instala en environment (de lambdas) el listado de paquetes del requirements.txt
 
+
 Estructura de los proyectos.
 #################################
 
@@ -32,7 +33,7 @@ EL repositorio contiene todo el ambiente de micro servicios, cada proyecto(carpe
 
 ejecuciones locales
 =============================
-Para realizar ejecuciones locales, se recomienda incluir en el requirements de Lambdas los requirements del proyecto, entrar al proyecto y ejecutar el archivo principal "app.py"
+Para realizar ejecuciones locales, se recomienda incluir en el requirements de Lambdas los requirements del proyecto, entrar al proyecto y ejecutar el archivo principal **"app.py"**
 
 hacer deploy?
 =============================
@@ -48,7 +49,11 @@ archivo ~/.aws/config
     aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
     region=YOUR_REGION (such as us-west-2, us-west-1, etc)
 
+
 Asegurado la existencia de las credenciales, "simplemente" se ingresa a la carpeta de la funcionalidad a subir, y se ejecuta:
+
+::
+
     chalice deploy
 
 

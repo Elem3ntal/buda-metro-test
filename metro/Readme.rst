@@ -22,9 +22,9 @@ Endpoint.
  - destiny=santa rosa
  - color=red (color es optativo)
 
-EJ:
-https://dognx5fm7b.execute-api.us-west-2.amazonaws.com/api/?from=conchali&destiny=tobalaba&color=verde
-https://dognx5fm7b.execute-api.us-west-2.amazonaws.com/api/?from=tobalaba&destiny=conchali
+EJ *(emplos)*:
+ - https://dognx5fm7b.execute-api.us-west-2.amazonaws.com/api/?from=conchali&destiny=tobalaba&color=verde
+ - https://dognx5fm7b.execute-api.us-west-2.amazonaws.com/api/?from=tobalaba&destiny=conchali
 
 
 - (GET)https://dognx5fm7b.execute-api.us-west-2.amazonaws.com/api/list/: retorna el listado de todas las estaciones de metro disponibles, indicando el nombre (name), la estación previa (prev) y siguiente (next) en caso de existir, la linea (line) y el color (color-opcional) en caso de que la estación sea *"exclusiva"*
