@@ -48,7 +48,7 @@ archivo ~/.aws/config
     aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
     region=YOUR_REGION (such as us-west-2, us-west-1, etc)
 
-Asegurado la existencia de las credenciales, *"simplemente"* se ingresa a la carpeta de la funcionalidad a subir, y se ejecuta:
+Asegurado la existencia de las credenciales, "simplemente" se ingresa a la carpeta de la funcionalidad a subir, y se ejecuta:
     chalice deploy
 
 
