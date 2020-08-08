@@ -35,7 +35,7 @@ clean-cache:
 prepare-dev:
 	@+echo  $(HEADER)"Instalando paqueteria de sistema"$(END)
 	@+echo $(HEADER)"---------------------------------------------"$(END)
-	sudo apt-get -y install python$(RUNTIME_VERSION) python3-pip python3-pygments;
+	sudo apt-get -y install python$(RUNTIME_VERSION) python3-pip python3-dev python3-pygments;
 	python3 -m pip install virtualenv;
 	@+echo $(OKGREEN)"[OK] Sistema Listo "$(END)
 

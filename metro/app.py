@@ -33,7 +33,7 @@ def sanitizer(string):
     """
     toma una cadena de texto y ejecuta un proceso de limpieza que consiste en:
         - Eliminar acentos.
-        - Texto en minuscula.
+        - Texto en minúscula.
         - sin espacios a la izquierda y a la derecha.
 
 
@@ -66,7 +66,7 @@ def retrieve_file():
 
     Returns
     -------
-     - list(dict) / lístado de diccionarios.
+     - list(dict) / listado de diccionarios.
 
     :Author:
         - Javier 'rod' Rodríguez.
@@ -169,9 +169,50 @@ def metro_route_finder(**kwargs):
     }
 
 
+@app.route('/list')
+def generate_list():
+    """
+    retorna el listado de estaciones disponibles.
+
+    Parameters
+    ----------
+     -
+
+    Returns
+    -------
+     - dict:
+     {
+        'stations': [
+            {
+                'name': 'alcantara',
+                'prev': 'el golf',
+                'line': 'l1',
+                'next': 'escuela militar',
+                'color': 'verde' # optativo
+            },
+            ...
+        ]
+     }
+
+    :Author:
+        - Javier 'rod' Rodríguez.
+
+    :Created:
+        - 2020.08.8.
+    """
+    stations = [
+        {key: sanitizer(value) for key, value in station.items()}
+        for station in retrieve_file()
+
+    ]
+    return {
+        'stations': stations
+    }
+
+
 """
-__name__ es 'app' cuando la invocación es desde aws, por lo que, __main__ (o principal) 
-queda para las ejecuciones en local/testing
+__name__ es 'app' cuando la invocación es desde aws (ya que importa este archivo se importa), 
+por lo que, __main__ (o principal) queda para las ejecuciones en local/testing
 """
 
 if __name__ == '__main__':
@@ -185,3 +226,4 @@ if __name__ == '__main__':
     ]
     for values in sets:
         print(metro_route_finder(**values))
+    print(generate_list())
