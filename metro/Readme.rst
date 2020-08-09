@@ -1,7 +1,7 @@
 Metro
 ====================
 
-Obtiene la ruta mas "corta"(en caso de existir) a una red de metro dada (mediante el archivo stgo.json), aplicando el algoritmo de Dijkstra.
+Obtiene la ruta mas "corta"(en caso de existir) a una red de metro dada (mediante el parámetro city), aplicando el algoritmo de Dijkstra.
 
 
 Métodos disponibles
