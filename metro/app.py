@@ -12,7 +12,7 @@ app = Chalice(app_name='metro')
 
 
 @contextmanager
-def ignore(*exceptions):
+def ignore(*exceptions, quiet=False):
     """
     Contexto que permite ignorar las excepciones que puedan ocurrir.
 
@@ -26,7 +26,17 @@ def ignore(*exceptions):
     try:
         yield
     except exceptions as e:
-        print(e)
+        None if quiet else print(e)
+
+
+def retrieve_next(current=None, replaces=None, flow=None, default=None):
+    panic_loop = 0
+    while current in replaces:
+        current = replaces[current][flow]
+        panic_loop -= - 1
+        if panic_loop > len(replaces):
+            return default
+    return current
 
 
 def sanitizer(string):
@@ -56,7 +66,9 @@ def sanitizer(string):
 
 
 @lru_cache()
-def retrieve_file():
+def retrieve_file(city=''):
+    if not city.endswith('.json'):
+        city = f'{city}.json'
     """
     carga (y guarda en memoria mediante lru_cache) el listado de las estaciones.
 
@@ -74,7 +86,7 @@ def retrieve_file():
     :Created:
         - 2020.08.7.
     """
-    return json.load(open('chalicelib/stgo.json'))
+    return json.load(open(f'chalicelib/{city}'))
 
 
 @app.route('/')
@@ -86,20 +98,28 @@ def metro_route_finder(**kwargs):
      - dict: {
          'from': 'conchali',
          'destiny': 'tobalaba',
-         'color': 'azul'
+         'color': 'azul',
+         'city': 'buda-city'
      }
 
     Returns
     -------
      - dict: {
-        'from': 'conchali',  # convertido a como lo interpreta el programa
-        'destiny': 'conservia', # convertido a como lo interpreta el programa
-        'route': [], # siempre, independiente si la ruta es posible o no.
-        'reason': 'impossible route',  # en caso de que ruta sea vacía, indica el motivo.
-        'present_in_graph': { # si uno de los destinos no esta en el ruta, estos son informados.
-            'conchali': True,
-            'conservia': False
-        }
+        'params': { # params como copia de los parámetros ingresados.
+            'from': 'a',  # punto de partida
+            'destiny': 'f', # punto de llegara
+            'color': 'red', # valor opcional, indicando el tipo de tren a tomar
+            'city': 'buda_city' # valor opcional, por defecto es stgo.
+        },
+        'nodes': ['a', 'b', 'c', 'h', 'f']
+        },
+        # solo estará presente cuando una de las ciudades solicitadas no este en la red
+        'present_in_graph': {
+            'a': False,
+            'f': True
+        },
+        # solo aparecerá en caso de que la ruta no se pueda generar, o no exista la ciudad
+        'reason': 'impossible route'
     }
 
     :Author:
@@ -110,7 +130,7 @@ def metro_route_finder(**kwargs):
     """
     params = {}
 
-    with ignore():
+    with ignore(quiet=True):
         params.update(**kwargs)
         params = dict(app.current_request.query_params)
         params = {key: sanitizer(value) for key, value in params.items()}
@@ -118,28 +138,59 @@ def metro_route_finder(**kwargs):
     color = params.get('color', '')
     start = params.get('from', '')
     destiny = params.get('destiny', '')
+    city = params.get('city', 'stgo')
     graph = Graph()
 
     stations = []
-    for station in retrieve_file():
-        station = {key: sanitizer(value) for key, value in station.items()}
+    with ignore():
+        stations = [
+            {key: sanitizer(value) for key, value in station.items()}
+            for station in retrieve_file(city=city)
+        ]
+    if not stations:
+        return {
+            'params': params,
+            'nodes': [],
+            'reason': f'the city {city} do not exist or has no stations.'
+        }
 
-        # obtención de valores
+    find_replaces = defaultdict(dict)
+    available_stations = []
+
+    # se buscan las estaciones que no pueden estar en la red por la restricción de color
+    for station in stations:
         name = station.get('name')
         prev = station.get('prev')
         next_s = station.get('next')
         color_station = station.get('color', color)
+        same_color = True if len(color) == 0 else color == color_station
+
+        if not same_color:
+            find_replaces[name]['prev'] = prev
+            find_replaces[name]['next'] = next_s
+            continue
+        available_stations.append(station)
+
+    # se buscan los reemplazos de las espacios dejados por las estaciones excluidas por el color
+    for station in available_stations:
+
+        name = station.get('name')
+        prev = retrieve_next(
+            current=station.get('prev'),
+            replaces=find_replaces,
+            flow='prev'
+        )
+        next_s = retrieve_next(
+            current=station.get('next'),
+            replaces=find_replaces,
+            flow='next'
+        )
 
         # análisis de extremos y color
         if not prev:
             prev = f'terminal-{name}'
         if not next_s:
             next_s = f'terminal-{name}'
-
-        same_color = True if len(color) == 0 else color == color_station
-
-        if not same_color:
-            continue
 
         # se añade al grafo los nodos de las estaciones de metros, no aplica el
         # costo de movimiento, por lo que se deja en 1
@@ -150,11 +201,10 @@ def metro_route_finder(**kwargs):
     extra_response = defaultdict(dict)
     nodes = []
 
-    if not all(map(lambda x: x in graph, (start, destiny))):
-        if start:
-            extra_response['present_in_graph'][start] = start in graph
-        if destiny:
-            extra_response['present_in_graph'][destiny] = destiny in graph
+    if start not in graph:
+        extra_response['present_in_graph'][start] = start in graph
+    if destiny not in graph:
+        extra_response['present_in_graph'][destiny] = destiny in graph
 
     with ignore():
         nodes = find_path(graph, start, destiny).nodes
@@ -163,22 +213,21 @@ def metro_route_finder(**kwargs):
 
     return {
         **{
-            'from': start,
-            'destiny': destiny,
-            'route': nodes
+            'params': params,
+            'nodes': nodes
         },
         **extra_response
     }
 
 
 @app.route('/list')
-def generate_list():
+def generate_list(**kwargs):
     """
     retorna el listado de estaciones disponibles.
 
     Parameters
     ----------
-     -
+     - (str) city = nombre de ciudad/mapa a retornar.
 
     Returns
     -------
@@ -202,13 +251,23 @@ def generate_list():
     :Created:
         - 2020.08.8.
     """
-    stations = [
-        {key: sanitizer(value) for key, value in station.items()}
-        for station in retrieve_file()
+    city = kwargs.get('city')
 
-    ]
+    with ignore(quiet=True):
+        city = app.current_request.query_params['city']
+
+    stations = []
+    with ignore(quiet=True):
+        stations = [
+            {key: sanitizer(value) for key, value in station.items()}
+            for station in retrieve_file(city=city)
+
+        ]
+        return {
+            'stations': stations
+        }
     return {
-        'stations': stations
+        'error': f'the city {city} do not exist or has no stations.'
     }
 
 
@@ -218,14 +277,28 @@ por lo que, __main__ (o principal) queda para las ejecuciones en local/testing
 """
 
 if __name__ == '__main__':
-    sets = [
-        {'from': 'conchali', 'destiny': 'tobalaba', 'color': 'azul'},
-        {'from': 'conchali', 'destiny': 'tobalaba'},
-        {'destiny': 'hospital el pino', 'from': 'vespucio norte'},
-        {'destiny': 'toesca', 'from': 'franklin'},
-        {'destiny': 'conservia', 'from': 'salsacia'},
-        {'destiny': 'conchali', 'from': 'salsacia'},
+    sets_routes = (
+        [
+            {'from': 'conchali', 'destiny': 'tobalaba', 'color': 'azul'},
+            {'from': 'conchali', 'destiny': 'tobalaba'},
+            {'destiny': 'hospital el pino', 'from': 'vespucio norte'},
+            {'destiny': 'toesca', 'from': 'franklin'},
+            {'destiny': 'conservia', 'from': 'salsacia'},
+            {'destiny': 'conchali', 'from': 'salsacia'},
+        ],
+        [
+            {'from': 'a', 'destiny': 'f', 'city': 'buda_city'},
+            {'from': 'a', 'destiny': 'f', 'color': 'red', 'city': 'buda_city'},
+            {'from': 'a', 'destiny': 'i', 'color': 'green', 'city': 'chile'},
+        ]
+    )
+    sets_cities = [
+        'stgo',
+        'buda_city',
+        'tangananica'
     ]
-    for values in sets:
-        print(metro_route_finder(**values))
-    print(generate_list())
+    for sets in sets_routes:
+        for values in sets:
+            print(metro_route_finder(**values))
+    for city in sets_cities:
+        print(generate_list(city=city))
