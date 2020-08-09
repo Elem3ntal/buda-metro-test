@@ -43,7 +43,7 @@ Sobre las estaciones de metro.
 
 las estaciones de "metro" estan presentes en **chalicelib** con en nombre de la 'ciudad', el archivo json es un listado con los datos:
 
-.. code-block::javascript
+.. code-block:: javascript
 
     [
       {
