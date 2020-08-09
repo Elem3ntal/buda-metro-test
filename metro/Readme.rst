@@ -41,15 +41,15 @@ EJ:
 Sobre las estaciones de metro.
 ===============================
 
-las estaciones de "metro" estan presentes en **chalicelib** con en nombre de la 'ciudad', el archivo json es un listado con los datos:
+las estaciones de "metro" están presentes en **chalicelib** con en nombre de la 'ciudad', el archivo json es un listado con los datos:
 
 .. code-block:: javascript
 
     [
       {
         "name": "alcántara",  // como nombre identificador, el mismo debe ser ocupado en prev y next
-        "prev": "el golf",  // indica a la estacion a la cual se puede "retroceder"
-        "next": "escuela militar"  // indica a la estacion a la cual se puede "avanzar"
+        "prev": "el golf",  // indica a la estación a la cual se puede "retroceder"
+        "next": "escuela militar"  // indica a la estación a la cual se puede "avanzar"
         "line": "l1",  // actualmente sin uso,
         "color": "red"  // opcional, en caso de existir, indica la exclusividad para el tren de "color"
       },

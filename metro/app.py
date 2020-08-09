@@ -30,6 +30,27 @@ def ignore(*exceptions, quiet=False):
 
 
 def retrieve_next(current=None, replaces=None, flow=None, default=None):
+    """
+    retorna la estación de metro en caso de que la siguiente/anterior este en el listado de
+    estaciones a omitir.
+
+    Parameters
+    ----------
+     - (string) current: estación actual
+     - (dict) dict: estaciones a omitir
+     - (string) flow: "flujo" siguiente/previa
+     - (any) default: retorno en caso de no existir.
+
+    Returns
+    -------
+     - (string/any) estación de metro en el flujo(flow) correspondiente
+
+    :Author:
+        - Javier 'rod' Rodríguez.
+
+    :Created:
+        - 2020.08.9.
+    """
     panic_loop = 0
     while current in replaces:
         current = replaces[current][flow]
@@ -67,14 +88,12 @@ def sanitizer(string):
 
 @lru_cache()
 def retrieve_file(city=''):
-    if not city.endswith('.json'):
-        city = f'{city}.json'
     """
     carga (y guarda en memoria mediante lru_cache) el listado de las estaciones.
 
     Parameters
     ----------
-     - None
+     - (string) city como archivo a cargar
 
     Returns
     -------
@@ -86,6 +105,8 @@ def retrieve_file(city=''):
     :Created:
         - 2020.08.7.
     """
+    if not city.endswith('.json'):
+        city = f'{city}.json'
     return json.load(open(f'chalicelib/{city}'))
 
 
