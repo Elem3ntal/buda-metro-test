@@ -43,7 +43,7 @@ Sobre las estaciones de metro.
 
 las estaciones de "metro" estan presentes en **chalicelib** con en nombre de la 'ciudad', el archivo json es un listado con los datos:
 
-:: code-block::javascript
+.. code-block::javascript
 
     [
       {
@@ -52,10 +52,8 @@ las estaciones de "metro" estan presentes en **chalicelib** con en nombre de la 
         "next": "escuela militar"  // indica a la estacion a la cual se puede "avanzar"
         "line": "l1",  // actualmente sin uso,
         "color": "red"  // opcional, en caso de existir, indica la exclusividad para el tren de "color"
-
       },
       {}
-
     ]
 
 
