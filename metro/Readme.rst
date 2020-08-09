@@ -10,6 +10,7 @@ Métodos disponibles
 Relacionados con la funcionalidad del "Algoritmo"
 
 - generate_list, dado los argumentos 'city' (actualmente, disponible 'stgo' y 'buda_city', retorna un listado de diccionarios con el detalle de las estaciones de metros en la "red".
+
 - metro_route_finder: dado los argumentos 'from', 'destiny' y 'color' (optativo), 'city'(optativo, stgo por defecto), indica la ruta más "corta" entre estación y estación (considerando que el costo de moverse entre estaciones es de "1")
 
 
